@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+
+  redis:
+    image: redis:7.4.3
+    hostname: redis
+    container_name: redis
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      redis-network:
+        ipv4_address: 10.6.0.2
+
+  sentinel:
+    image: redis:7.4.3
+    container_name: sentinel
+    hostname: sentinel
+    depends_on:
+      - redis
+    ports:
+      - "26379:26379"
+    command: >
+      redis-sentinel /data/sentinel.conf
+    volumes:
+      - ./sentinel-data:/data
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      redis-network:
+        ipv4_address: 10.6.0.3
+
+networks:
+  redis-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.6.0.0/16
+          gateway: 10.6.0.1

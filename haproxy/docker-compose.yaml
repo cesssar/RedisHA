@@ -1,0 +1,23 @@
+version : '3.5'
+
+services:
+  haproxy:
+    container_name: haproxy
+    hostname: haproxy
+    image: haproxy
+    ports:
+      - "8080:8080"
+      - "6379:6379"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      redis-network:
+        ipv4_address: 10.6.0.2
+
+networks:
+  redis-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.6.0.0/16
+          gateway: 10.6.0.1
