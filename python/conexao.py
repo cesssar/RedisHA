@@ -37,6 +37,12 @@ class Conexao:
         
         
     def __close(self) -> bool:
+        """
+        Fecha a conexão com o banco de dados Redis.
+        Returns:
+            bool: Retorna True se a conexão foi fechada com sucesso, 
+            caso contrário, retorna False.
+        """
         try:
             self.conexao.close()
             return True
@@ -45,7 +51,7 @@ class Conexao:
             return False
         
         
-    def set_string(self, chave: str, valor: str) -> bool:
+    def set_string(self, chave: str, valor: str, expira: int = None) -> bool:
         """
         Define uma chave e um valor no banco de dados Redis.
         Este método armazena uma string no Redis associada a uma chave específica.
@@ -55,13 +61,14 @@ class Conexao:
         Params:
             chave (str): A chave que será usada para armazenar o valor no Redis.
             valor (str): O valor que será armazenado no Redis.
+            expira (int): valor em segundos para expirar o conteúdo no Redis.
         Returns:
             bool: Retorna True se a operação for bem-sucedida, caso contrário, False.
         """
         try:
             if self.conexao is None:
                 self.conexao = self.__get_conexao()
-            return self.conexao.set(chave, valor)
+            return self.conexao.set(chave, valor) if expira is None else self.conexao.set(chave, valor, ex=expira)
         except Exception as e:
             print('set_string', e)
             return False
@@ -84,7 +91,7 @@ class Conexao:
         try:
             if self.conexao is None:
                 self.conexao = self.__get_conexao()
-            return self.conexao.get(chave).decode('utf-8')
+            return self.conexao.get(chave)
         except Exception as e:
             print('get_string',e)
             return None
@@ -106,9 +113,10 @@ class Conexao:
         try:
             if self.conexao is None:
                 self.conexao = self.__get_conexao()
-            return self.conexao.rpush(chave, *lista)
+            self.conexao.rpush(chave, *lista)
+            return True
         except Exception as e:
-            print('set_string', e)
+            print('set_list', e)
             return False
         finally:
             self.__close()
@@ -127,9 +135,9 @@ class Conexao:
         try:
             if self.conexao is None:
                 self.conexao = self.__get_conexao()
-            return self.conexao.lpop(chave).decode('utf-8')
+            return self.conexao.lpop(chave)
         except Exception as e:
-            print('set_string', e)
+            print('get_item_list', e)
             return None
         finally:
             self.__close()
@@ -152,7 +160,7 @@ class Conexao:
             self.conexao.sadd(chave, *lista)
             return True
         except Exception as e:
-            print('set_string', e)
+            print('set_set', e)
             return False
         finally:
             self.__close()
@@ -171,8 +179,8 @@ class Conexao:
                 self.conexao = self.__get_conexao()
             return self.conexao.smembers(chave)
         except Exception as e:
-            print('set_string', e)
-            return None
+            print('get_set', e)
+            return []
         finally:
             self.__close()
 
@@ -196,7 +204,7 @@ class Conexao:
             self.conexao.hset(chave, atributo, valor)
             return True
         except Exception as e:
-            print('set_string', e)
+            print('set_hset', e)
             return False
         finally:
             self.__close()
@@ -218,13 +226,24 @@ class Conexao:
             chave = str(chave) + ':' + str(id)
             return self.conexao.hgetall(chave)
         except Exception as e:
-            print('set_string', e)
+            print('get_hset', e)
             return {}
         finally:
             self.__close()
 
 
     def delete(self, chave: str, id: int=None) -> bool:
+        """
+        Remove uma chave do Redis.
+        Este método exclui uma chave específica do Redis. Caso um `id` seja fornecido, 
+        ele será concatenado à chave antes da exclusão.
+        Params:
+            chave (str): A chave a ser removida do Redis.
+            id (int, opcional): Um identificador adicional que será concatenado à chave. 
+                Padrão é None.
+        Returns:
+            bool: Retorna True se a chave foi removida com sucesso, caso contrário, False.
+        """
         try:
             if self.conexao is None:
                 self.conexao = self.__get_conexao()
@@ -233,7 +252,7 @@ class Conexao:
             self.conexao.delete(chave)
             return True
         except Exception as e:
-            print('set_string', e)
+            print('delete', e)
             return False
         finally:
             self.__close()
