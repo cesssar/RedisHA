@@ -40,6 +40,7 @@ Redis utiliza replicação assíncrona, o que significa que em caso de falha do 
 
 O projeto está organizado nos diretórios abaixo para facilitar a separação dos arquivos necessários para execução. Abaixo a estrutura e comentários do que é necessário ajustar para o ambiente onde será executado.
 
+```
 Projeto
 |
 ├── haproxy/
@@ -55,7 +56,7 @@ Projeto
 |   ├── docker-compose.yaml     # aplicar em todos os servidores que irão executar o Redis
 ├── redisweb/
 |   ├── docker-compose.yaml     # aplicar no servidor ou máquina local para interface web
-
+```
 
 ## Requisitos
 
@@ -80,7 +81,6 @@ Executar o docker-compose:
 
 ```
 docker-compose up -d
-
 ```
 
 Para os servidores que serão os nós do Redis, copiar o arquivo redis.conf da pasta nodes e o docker-compose.yaml da pasta nodes.
@@ -88,14 +88,12 @@ Executar o docker-compose:
 
 ```
 docker-compose up -d
-
 ```
 
 Para o servidor que será o proxy, copiar a pasta haproxy com seu conteúdo e executar o docker-compose:
 
 ```
 docker-compose up -d
-
 ```
 
 E executar o docker-compose da pasta redisweb para iniciar o cliente web que manipula o banco de dados Redis.
@@ -107,7 +105,7 @@ Para visualizar e manipular o banco de dados é possível utilizar o Redis Insig
 
 Acesse o Redis Insight:
 
-http://<IP do servidor ou localhost>:5540
+http://IP do servidor ou localhost:5540
 
 No primeiro acesso aceite os termos.
 Depois clique em + Add Redis database e em seguida no botão Connection Settings
